@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CyberNest Dashboard</title>
+<style>
+body{
+font-family:Arial;
+background:#0f0f1e;
+color:white;
+padding:30px;
+}
+.card{
+background:#1a1a2e;
+padding:20px;
+margin-bottom:20px;
+border-radius:10px;
+}
+.device{
+background:#16213e;
+padding:15px;
+margin:10px 0;
+border-radius:8px;
+display:flex;
+justify-content:space-between;
+}
+.online{color:#22c55e;}
+.offline{color:#ef4444;}
+</style>
+</head>
+
+<body>
+
+<h1>CyberNest Dashboard</h1>
+
+<div class="card">
+<h2>Total Devices: <span id="totalDevices">0</span></h2>
+<h3>Active: <span id="activeDevices">0</span></h3>
+<h3>Offline: <span id="offlineDevices">0</span></h3>
+</div>
+
+<div class="card">
+<h2>Devices</h2>
+<div id="deviceList"></div>
+</div>
+
+<script>
+
+const API_URL = "http://localhost:3000/api/devices";
+
+async function loadDevices(){
+
+try{
+
+const response = await fetch(API_URL,{ method:"POST" });
+
+const data = await response.json();
+
+const devices = data.data?.devices?.items || [];
+
+let active = 0;
+let offline = 0;
+
+const deviceList = document.getElementById("deviceList");
+deviceList.innerHTML = "";
+
+devices.forEach(device=>{
+
+    console.log(device);
+
+    const isOnline = device.statusCode === "green";
+
+    if(isOnline) active++;
+    else offline++;
+
+    const statusClass = isOnline ? "online":"offline";
+    const statusText = isOnline ? "Online":"Offline";
+
+    deviceList.innerHTML += `
+    <div class="device">
+        <div>
+        <b>${device.number || "Unknown Device"}</b><br>
+        Device ID: ${device.id}
+        </div>
+        <div class="${statusClass}">
+        ${statusText}
+        </div>
+    </div>
+    `;
+});
+
+document.getElementById("totalDevices").innerText =
+data.data?.devices?.totalItemsCount || 0;
+
+document.getElementById("activeDevices").innerText = active;
+document.getElementById("offlineDevices").innerText = offline;
+
+}catch(error){
+console.log(error);
+alert("Error loading devices");
+}
+
+}
+
+window.onload = loadDevices;
+
+
+</script>
+
+</body>
+</html>
