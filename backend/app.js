@@ -1,12 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const deviceRoutes = require("./routes/deviceRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/auth", authRoutes);
+app.use("/api/device", deviceRoutes);
 
+//get api to test backend is running
 app.get("/", (req, res) => {
   res.send("CyberNest Backend Running ");
 });
