@@ -3,6 +3,7 @@ const cors = require("cors");
 const pool = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
+const locationRoutes = require("./routes/locationRoutes");
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/device", deviceRoutes);
+app.use("/api/location", locationRoutes);
 
 //get api to test backend is running
 app.get("/", (req, res) => {
