@@ -5,10 +5,8 @@ exports.sendCommand = async (req, res) => {
   const { device_id, command } = req.body;
 
   try {
-    const result = await pool.query(
-      "SELECT fcm_token FROM devices WHERE device_id=$1",
-      [device_id]
-    );
+    const result = await pool.query("SELECT fcm_token FROM devices WHERE device_id=$1 AND user_id=$2",
+    [device_id, req.user.id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Device not found" });

@@ -3,11 +3,12 @@ const pool = require("../config/db");
 // CREATE POLICY
 exports.createPolicy = async (req, res) => {
   const { camera, app_install, location } = req.body;
+  const user_id = req.user.id;
 
   try {
     const result = await pool.query(
-      "INSERT INTO policies (camera, app_install, location) VALUES ($1, $2, $3) RETURNING *",
-      [camera, app_install, location]
+      "INSERT INTO policies (camera, app_install, location, user_id) VALUES ($1, $2, $3, $4) RETURNING *",
+      [camera, app_install, location, user_id]
     );
 
     res.json({ message: "Policy created", policy: result.rows[0] });
@@ -19,7 +20,7 @@ exports.createPolicy = async (req, res) => {
 // GET ALL POLICIES
 exports.getPolicies = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM policies");
+    const result = await pool.query("SELECT * FROM policies WHERE user_id = $1",[req.user.id]);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
