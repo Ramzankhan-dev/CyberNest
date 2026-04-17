@@ -16,6 +16,10 @@ exports.sendCommand = async (req, res) => {
 
     const token = result.rows[0].fcm_token;
 
+    //for console debugging
+    console.log("Command:", command);
+    console.log("Device token:", token);
+
     await sendPushNotification(token, {
       command: command,
     });

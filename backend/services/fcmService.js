@@ -13,6 +13,11 @@ const sendPushNotification = async (token, data) => {
   };
 
   try {
+    //for console debuging
+    console.log("Sending FCM...");
+    console.log("Token:", token);
+    console.log("Data:", data);
+
     await admin.messaging().send(message);
     console.log("Notification sent");
   } catch (error) {
