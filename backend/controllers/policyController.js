@@ -25,3 +25,48 @@ exports.getPolicies = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+//ASSIGN POLICY TO DEVICE
+exports.assignPolicy = async (req, res) => {
+  const { device_id, policy_id } = req.body;
+
+  try {
+    const result = await pool.query(
+      "UPDATE devices SET policy_id = $1 WHERE device_id = $2 RETURNING *",
+      [policy_id, device_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Device not found" });
+    }
+
+    res.json({
+      message: "Policy assigned successfully",
+      device: result.rows[0],
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//GET POLICY by device id
+exports.getDevicePolicy = async (req, res) => {
+  const { device_id } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT p.* FROM devices d
+       JOIN policies p ON d.policy_id = p.policy_id
+       WHERE d.device_id = $1`,
+      [device_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "No policy found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
