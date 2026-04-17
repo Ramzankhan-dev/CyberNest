@@ -4,6 +4,7 @@ const pool = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const locationRoutes = require("./routes/locationRoutes");
+const commandRoutes = require("./routes/commandRoutes");
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/device", deviceRoutes);
 app.use("/api/location", locationRoutes);
+app.use("/api/command", commandRoutes);
 
 //get api to test backend is running
 app.get("/", (req, res) => {
