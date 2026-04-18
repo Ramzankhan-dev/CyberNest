@@ -10,23 +10,31 @@ exports.sendLocation = async (req, res) => {
       [device_id, latitude, longitude]
     );
 
+    // update last_seen
+    await pool.query(
+      "UPDATE devices SET last_seen = NOW() WHERE device_id = $1",
+      [device_id]
+    );
+
     res.json({ message: "Location saved" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
 // GET LOCATION (Web → Backend)
-exports.getLocation = async (req, res) => {
+exports.getLocations = async (req, res) => {
   const { device_id } = req.params;
 
   try {
     const result = await pool.query(
-      "SELECT * FROM location_logs WHERE device_id=$1 ORDER BY created_at DESC LIMIT 1",
+      "SELECT * FROM location_logs WHERE device_id = $1 ORDER BY timestamp DESC",
       [device_id]
     );
 
-    res.json(result.rows[0]);
+    res.json(result.rows);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -1,6 +1,7 @@
 const pool = require("../config/db");
 const { sendPushNotification } = require("../services/fcmService");
 
+//SEND COMMANDS TO DEVICE
 exports.sendCommand = async (req, res) => {
   const { device_id, command } = req.body;
 
@@ -28,6 +29,23 @@ exports.sendCommand = async (req, res) => {
     );
 
     res.json({ message: "Command sent successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// GET COMMANDS FOR DEVICE
+exports.getCommands = async (req, res) => {
+  const { device_id } = req.params;
+
+  try {
+    const result = await pool.query(
+      "SELECT * FROM commands WHERE device_id = $1 ORDER BY created_at DESC",
+      [device_id]
+    );
+
+    res.json(result.rows);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

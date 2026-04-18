@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { sendLocation, getLocation } = require("../controllers/locationController");
+const { sendLocation, getLocations } = require("../controllers/locationController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
-// Protected routes
-router.post("/send-location", verifyToken, sendLocation);
-router.get("/get-location/:device_id", verifyToken, getLocation);
+router.post("/send", verifyToken, sendLocation);
+router.get("/:device_id", verifyToken, getLocations);
 
 module.exports = router;
