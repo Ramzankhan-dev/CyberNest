@@ -7,6 +7,7 @@ const deviceRoutes = require("./routes/deviceRoutes");
 const locationRoutes = require("./routes/locationRoutes");
 const commandRoutes = require("./routes/commandRoutes");
 const policyRoutes = require("./routes/policyRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/device", deviceRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/command", commandRoutes);
 app.use("/api/policy", policyRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ================================
 // ROOT API (HEALTH CHECK)
