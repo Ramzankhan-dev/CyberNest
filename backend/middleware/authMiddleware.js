@@ -4,18 +4,28 @@ exports.verifyToken = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
+    // Check if header exists
     if (!authHeader) {
       return res.status(401).json({ error: "No token provided" });
     }
 
+    // Check Bearer format
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Invalid token format" });
+    }
+
     const token = authHeader.split(" ")[1];
 
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded; // user id store
+    // Attach full user data (IMPORTANT)
+    req.user = decoded;
 
     next();
   } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
+    console.error("JWT Error:", err.message);
+
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 };

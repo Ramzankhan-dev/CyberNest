@@ -100,3 +100,16 @@ exports.login = async (req, res) => {
   }
 };
 
+// GET CURRENT USER
+exports.getMe = async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, name, email, role, organization_id FROM users WHERE id=$1",
+      [req.user.id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
