@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./config/db");
+
 const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const locationRoutes = require("./routes/locationRoutes");
@@ -9,21 +10,32 @@ const policyRoutes = require("./routes/policyRoutes");
 
 const app = express();
 
+// ================================
+// MIDDLEWARE
+// ================================
 app.use(cors());
 app.use(express.json());
+
+// ================================
+// ROUTES
+// ================================
 app.use("/api/auth", authRoutes);
 app.use("/api/device", deviceRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/command", commandRoutes);
 app.use("/api/policy", policyRoutes);
 
-//get api to test backend is running
+// ================================
+// ROOT API (HEALTH CHECK)
+// ================================
 app.get("/", (req, res) => {
-  res.send("CyberNest Backend Running ");
+  res.send("🚀 CyberNest Backend Running...");
 });
 
-//get testing api for db connection
-app.get("/test-db", async (req, res) => {
+// ================================
+// DB CONNECTION TEST
+// ================================
+app.get("/api/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
     res.json({
@@ -31,18 +43,46 @@ app.get("/test-db", async (req, res) => {
       time: result.rows[0],
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: "Database connection failed",
+      details: err.message,
+    });
   }
 });
 
-//get user detail api
-app.get("/users", async (req, res) => {
+// ================================
+// DEBUG API (REMOVE LATER)
+// ================================
+app.get("/api/users", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM users");
+    const result = await pool.query(
+      "SELECT id, name, email, role, organization_id FROM users"
+    );
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ================================
+// 404 HANDLER
+// ================================
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Route not found",
+  });
+});
+
+// ================================
+// GLOBAL ERROR HANDLER
+// ================================
+app.use((err, req, res, next) => {
+  console.error("🔥 ERROR:", err.stack);
+
+  res.status(500).json({
+    error: "Something went wrong",
+    details: err.message,
+  });
 });
 
 module.exports = app;
