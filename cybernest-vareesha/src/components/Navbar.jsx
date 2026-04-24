@@ -21,7 +21,6 @@ export default function Navbar({ sidebarOpen, setSidebarOpen }) {
     { path: '/commands', label: 'Commands', icon: AlertTriangle },
     { path: '/policies', label: 'Policies', icon: Settings },
     { path: '/admins', label: 'Admins', icon: Users },
-    { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const isActive = (path) => location.pathname.startsWith(path);
