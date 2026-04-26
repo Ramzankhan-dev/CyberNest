@@ -29,20 +29,20 @@ app.use("/api/command", commandRoutes);
 app.use("/api/policy", policyRoutes);
 app.use("/api/admin", adminRoutes);
 
-console.log("✅ All routes registered");
+console.log(" All routes registered");
 
 // ================================
 // TEST ROUTE (IMPORTANT)
 // ================================
 app.get("/test", (req, res) => {
-  res.send("🔥 TEST ROUTE WORKING");
+  res.send(" TEST ROUTE WORKING");
 });
 
 // ================================
 // ROOT API
 // ================================
 app.get("/", (req, res) => {
-  res.send("🚀 CyberNest Backend Running...");
+  res.send(" CyberNest Backend Running...");
 });
 
 // ================================
@@ -52,7 +52,7 @@ app.get("/api/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
     res.json({
-      message: "DB Connected ✅",
+      message: "DB Connected ",
       time: result.rows[0],
     });
   } catch (err) {
@@ -90,7 +90,7 @@ app.use((req, res) => {
 // ERROR HANDLER
 // ================================
 app.use((err, req, res, next) => {
-  console.error("🔥 ERROR:", err.stack);
+  console.error(" ERROR:", err.stack);
 
   res.status(500).json({
     error: "Something went wrong",
