@@ -64,7 +64,7 @@ export default function Login() {
           localStorage.setItem('adminName', data.user.name || '');
           localStorage.setItem('adminOrg', data.user.organization_name || '');
         }
-        navigate('/cybernest-dashboard');
+        navigate('/index');
       } else {
         setError(data.message || 'Invalid email ya password');
       }
