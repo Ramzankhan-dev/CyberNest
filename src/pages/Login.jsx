@@ -66,10 +66,10 @@ export default function Login() {
         }
         navigate('/index');
       } else {
-        setError(data.message || 'Invalid email ya password');
+        setError(data.message || 'Invalid email or password');
       }
     } catch {
-      setError('Connection failed! Backend server check karo.');
+      setError('Connection failed! check Backend server.');
     } finally {
       setIsLoading(false);
     }
@@ -185,12 +185,12 @@ export default function Login() {
                 onMouseLeave={() => setBtnHover(false)}>
                 {isLoading
                   ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} /><span>Authenticating...</span></>
-                  : <><Lock size={15} /><span>Sign In to Dashboard</span></>
+                  : <><Lock size={15} /><span>Login</span></>
                 }
               </button>
 
               <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#475569', margin: 0 }}>
-                Account nahi hai?{' '}
+                Don't have Account?{' '}
                 <span onClick={() => navigate('/signup')} style={{ color: '#22d3ee', cursor: 'pointer', fontWeight: 500 }}>
                   Sign Up
                 </span>
