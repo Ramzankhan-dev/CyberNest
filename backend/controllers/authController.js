@@ -9,11 +9,26 @@ exports.register = async (req, res) => {
   const { name, email, password, organization_name } = req.body;
 
   try {
-    if (!organization_name) {
-      return res.status(400).json({ error: "Organization name required" });
+    // ❗ validation
+    if (!name || !email || !password || !organization_name) {
+      return res.status(400).json({
+        error: "All fields are required",
+      });
     }
 
-    // 1. Create Organization
+    // ❗ check if user already exists
+    const existingUser = await pool.query(
+      "SELECT * FROM users WHERE email=$1",
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({
+        error: "User already exists",
+      });
+    }
+
+    // 1️⃣ CREATE ORGANIZATION
     const orgResult = await pool.query(
       "INSERT INTO organizations (name) VALUES ($1) RETURNING *",
       [organization_name]
@@ -21,19 +36,21 @@ exports.register = async (req, res) => {
 
     const orgId = orgResult.rows[0].id;
 
-    // 2. Hash password
+    // 2️⃣ HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Create User (Super Admin)
+    // 3️⃣ CREATE SUPER ADMIN
     const userResult = await pool.query(
-      `INSERT INTO users (name, email, password, role, organization_id)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, organization_id`,
+      `INSERT INTO users 
+      (name, email, password, role, organization_id)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, name, email, role, organization_id`,
       [name, email, hashedPassword, "super_admin", orgId]
     );
 
     const user = userResult.rows[0];
 
-    // 4. Generate JWT
+    // 4️⃣ GENERATE TOKEN
     const token = jwt.sign(
       {
         id: user.id,
@@ -45,7 +62,7 @@ exports.register = async (req, res) => {
     );
 
     res.json({
-      message: "Organization + Admin created",
+      message: "Organization + Super Admin created",
       user,
       token,
     });
@@ -54,6 +71,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // ================================
 // LOGIN
@@ -68,18 +86,23 @@ exports.login = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({
+        error: "User not found",
+      });
     }
 
     const user = result.rows[0];
 
+    // password check
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid password" });
+      return res.status(400).json({
+        error: "Invalid password",
+      });
     }
 
-    // JWT with organization + role
+    // JWT with org + role
     const token = jwt.sign(
       {
         id: user.id,
@@ -100,7 +123,10 @@ exports.login = async (req, res) => {
   }
 };
 
+
+// ================================
 // GET CURRENT USER
+// ================================
 exports.getMe = async (req, res) => {
   try {
     const result = await pool.query(
@@ -109,6 +135,7 @@ exports.getMe = async (req, res) => {
     );
 
     res.json(result.rows[0]);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
