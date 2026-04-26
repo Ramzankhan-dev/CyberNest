@@ -17,6 +17,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+console.log("🚀 App initialized");
+
 // ================================
 // ROUTES
 // ================================
@@ -27,21 +29,30 @@ app.use("/api/command", commandRoutes);
 app.use("/api/policy", policyRoutes);
 app.use("/api/admin", adminRoutes);
 
+console.log(" All routes registered");
+
 // ================================
-// ROOT API (HEALTH CHECK)
+// TEST ROUTE (IMPORTANT)
 // ================================
-app.get("/", (req, res) => {
-  res.send("🚀 CyberNest Backend Running...");
+app.get("/test", (req, res) => {
+  res.send(" TEST ROUTE WORKING");
 });
 
 // ================================
-// DB CONNECTION TEST
+// ROOT API
+// ================================
+app.get("/", (req, res) => {
+  res.send(" CyberNest Backend Running...");
+});
+
+// ================================
+// DB TEST
 // ================================
 app.get("/api/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
     res.json({
-      message: "DB Connected ✅",
+      message: "DB Connected ",
       time: result.rows[0],
     });
   } catch (err) {
@@ -53,7 +64,7 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 // ================================
-// DEBUG API (REMOVE LATER)
+// DEBUG USERS
 // ================================
 app.get("/api/users", async (req, res) => {
   try {
@@ -67,7 +78,7 @@ app.get("/api/users", async (req, res) => {
 });
 
 // ================================
-// 404 HANDLER
+// 404 HANDLER (LAST)
 // ================================
 app.use((req, res) => {
   res.status(404).json({
@@ -76,10 +87,10 @@ app.use((req, res) => {
 });
 
 // ================================
-// GLOBAL ERROR HANDLER
+// ERROR HANDLER
 // ================================
 app.use((err, req, res, next) => {
-  console.error("🔥 ERROR:", err.stack);
+  console.error(" ERROR:", err.stack);
 
   res.status(500).json({
     error: "Something went wrong",

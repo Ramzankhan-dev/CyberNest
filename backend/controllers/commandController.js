@@ -2,17 +2,32 @@ const pool = require("../config/db");
 const { sendPushNotification } = require("../services/fcmService");
 const headwindService = require("../services/headwindService");
 
-// SEND COMMANDS TO DEVICE
+// SEND COMMAND
 exports.sendCommand = async (req, res) => {
   console.log("🔥 API HIT HOI HAI");
 
   const { device_id, command } = req.body;
 
+  if (!device_id || !command) {
+    return res.status(400).json({ error: "device_id and command required" });
+  }
+
   try {
-    const result = await pool.query(
-      "SELECT fcm_token, headwind_device_id FROM devices WHERE device_id=$1 AND user_id=$2",
-      [device_id, req.user.id]
-    );
+    // ✅ FIX: pehle declare karo
+    const userId = req.user?.id || null;
+
+    console.log("👤 Using User ID:", userId);
+
+    // ✅ dynamic query
+    let query = "SELECT fcm_token, headwind_device_id FROM devices WHERE device_id=$1";
+    let params = [device_id];
+
+    if (userId) {
+      query += " AND user_id=$2";
+      params.push(userId);
+    }
+
+    const result = await pool.query(query, params);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Device not found" });
@@ -21,37 +36,41 @@ exports.sendCommand = async (req, res) => {
     const token = result.rows[0].fcm_token;
     const headwindId = result.rows[0].headwind_device_id;
 
-    console.log("Command:", command);
-    console.log("Device token:", token);
-    console.log("Headwind ID:", headwindId);
+    console.log("📌 Command:", command);
+    console.log("📌 Headwind ID:", headwindId);
 
     // ============================
     // HEADWIND CALL
     // ============================
     let headwindResponse = null;
 
-    try {
-      if (headwindId) {
+    if (headwindId) {
+      try {
         headwindResponse = await headwindService.sendCommand(headwindId, command);
-        console.log("✅ Headwind Response:", headwindResponse);
-      } else {
-        console.log("⚠️ No Headwind ID found, skipping Headwind");
+
+        if (headwindResponse) {
+          console.log("✅ Headwind Success");
+        } else {
+          console.log("⚠️ Headwind returned null");
+        }
+
+      } catch (err) {
+        console.log("❌ Headwind Failed:", err.message);
       }
-    } catch (err) {
-      console.log("❌ Headwind Failed:");
-      console.log("Error Message:", err.message);
-      console.log("Error Response:", err.response?.data);
+    } else {
+      console.log("⚠️ No Headwind ID found");
     }
 
     // ============================
     // FCM FALLBACK
     // ============================
-    await sendPushNotification(token, {
-      command: command,
-    });
+    if (!headwindResponse && token) {
+      console.log("📡 Sending via FCM fallback...");
+      await sendPushNotification(token, { command });
+    }
 
     // ============================
-    // SAVE TO DATABASE
+    // SAVE COMMAND
     // ============================
     await pool.query(
       "INSERT INTO commands (device_id, command_type, status) VALUES ($1, $2, $3)",
@@ -62,13 +81,24 @@ exports.sendCommand = async (req, res) => {
       ]
     );
 
+    // ============================
+    // RESPONSE
+    // ============================
     res.json({
+      success: true,
       message: "Command processed",
-      headwind: headwindResponse ? true : false,
+      via: headwindResponse ? "headwind" : "fcm",
+      device: device_id,
+      command: command,
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ Controller Error:", err.message);
+
+    res.status(500).json({
+      error: "Internal Server Error",
+      details: err.message,
+    });
   }
 };
 
