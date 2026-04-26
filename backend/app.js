@@ -17,6 +17,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+console.log("🚀 App initialized");
+
 // ================================
 // ROUTES
 // ================================
@@ -27,15 +29,24 @@ app.use("/api/command", commandRoutes);
 app.use("/api/policy", policyRoutes);
 app.use("/api/admin", adminRoutes);
 
+console.log("✅ All routes registered");
+
 // ================================
-// ROOT API (HEALTH CHECK)
+// TEST ROUTE (IMPORTANT)
+// ================================
+app.get("/test", (req, res) => {
+  res.send("🔥 TEST ROUTE WORKING");
+});
+
+// ================================
+// ROOT API
 // ================================
 app.get("/", (req, res) => {
   res.send("🚀 CyberNest Backend Running...");
 });
 
 // ================================
-// DB CONNECTION TEST
+// DB TEST
 // ================================
 app.get("/api/test-db", async (req, res) => {
   try {
@@ -53,7 +64,7 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 // ================================
-// DEBUG API (REMOVE LATER)
+// DEBUG USERS
 // ================================
 app.get("/api/users", async (req, res) => {
   try {
@@ -67,7 +78,7 @@ app.get("/api/users", async (req, res) => {
 });
 
 // ================================
-// 404 HANDLER
+// 404 HANDLER (LAST)
 // ================================
 app.use((req, res) => {
   res.status(404).json({
@@ -76,7 +87,7 @@ app.use((req, res) => {
 });
 
 // ================================
-// GLOBAL ERROR HANDLER
+// ERROR HANDLER
 // ================================
 app.use((err, req, res, next) => {
   console.error("🔥 ERROR:", err.stack);
